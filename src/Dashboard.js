@@ -9,6 +9,7 @@ import ListItemText from '@mui/material/ListItemText';
 import Chip from '@material-ui/core/Chip';
 import Button from '@material-ui/core/Button';
 import TextField from '@mui/material/TextField';
+import { CTX } from './Store';
 
 
 const useStyles = makeStyles(theme => ({
@@ -50,6 +51,15 @@ export default function Dashboard() {
     
     const classes = useStyles();
 
+    // CTX Store
+    const [allChats, sendChatAction, user] = React.useContext(CTX);
+
+    console.log({allChats})
+
+    const topics = Object.keys(allChats);
+
+    // local state
+    const [activeTopic, changeActiveTopic] = useState(topics[0]);
     const [textValue, changeTextValue] = useState('');
 
     return  (
@@ -60,14 +70,14 @@ export default function Dashboard() {
                     Chat App
                 </Typography>
                 <Typography variant="h5" component="h5">
-                    Topic Placeholder
+                    {activeTopic}
                 </Typography>
                 <div className={ classes.flex }>
                     <div className={ classes.topicsWindow }>
                         <List>
                             {
-                                ['topic'].map(topic => (
-                                    <ListItem key={topic}>
+                                topics.map(topic => (
+                                    <ListItem onClick={e => changeActiveTopic(e.target.innerText)} key={topic}>
                                         <ListItemText primary={ topic } />
                                     </ListItem>
                                 ))
@@ -77,10 +87,10 @@ export default function Dashboard() {
                     </div>
                     <div className={ classes.chatWindow }>
                             {
-                                [{from: 'user', msg: 'hello'}].map((chat, i) => (
+                                allChats[activeTopic].map((chat, i) => (
                                     <div className={classes.flex} key={i}>
                                         < Chip label={chat.from} className={classes.chip} />
-                                        <Typography variant='p'>{chat.msg}</Typography>
+                                        <Typography variant='body1' gutterBottom>{chat.msg}</Typography>
                                     </div>
                                 ))
                             }
@@ -96,7 +106,15 @@ export default function Dashboard() {
                         variant="standard"
                     />
                     
-                    <Button variant='contained' color='primary'>
+                    <Button 
+                    variant='contained' 
+                    color='primary'
+                    className={classes.button}
+                    onClick={() => {
+                        sendChatAction({from: user, msg: textValue, topic: activeTopic});
+                        changeTextValue('');
+                    }}
+                    >
                         Send
                     </Button>
                 </div>
